@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,6 +37,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.vokrob.weather_forecast_2.R
+import com.vokrob.weather_forecast_2.data.WeatherModel
 import com.vokrob.weather_forecast_2.ui.theme.BlueLight
 import kotlinx.coroutines.launch
 
@@ -188,8 +190,31 @@ fun TabLayout() {
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(15) {
-                    ListItem()
+                itemsIndexed(
+                    listOf(
+                        WeatherModel(
+                            "Barnaul",
+                            "10:00",
+                            "25°C",
+                            "Sunny",
+                            "//cdn.weatherapi.com/weather/64x64/night/113.png",
+                            "",
+                            "",
+                            ""
+                        ),
+                        WeatherModel(
+                            "Barnaul",
+                            "26/12/2024",
+                            "",
+                            "Sunny",
+                            "//cdn.weatherapi.com/weather/64x64/night/113.png",
+                            "26°",
+                            "12°",
+                            "asdadsadas"
+                        )
+                    )
+                ) { _, item ->
+                    ListItem(item)
                 }
             }
         }
