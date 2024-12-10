@@ -1,10 +1,13 @@
 package com.vokrob.weather_forecast_2
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,10 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.vokrob.weather_forecast_2.data.WeatherModel
+import com.vokrob.weather_forecast_2.screens.DialogSearch
 import com.vokrob.weather_forecast_2.screens.MainCard
 import com.vokrob.weather_forecast_2.screens.TabLayout
 import com.vokrob.weather_forecast_2.ui.theme.Weather_forecast_2Theme
@@ -30,9 +36,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            hide(WindowInsetsCompat.Type.statusBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.attributes.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
+
         setContent {
             Weather_forecast_2Theme {
                 val daysList = remember { mutableStateOf(listOf<WeatherModel>()) }
+                val dialogState = remember { mutableStateOf(false) }
                 val currentDay = remember {
                     mutableStateOf(
                         WeatherModel(
@@ -47,6 +64,13 @@ class MainActivity : ComponentActivity() {
                         )
                     )
                 }
+
+                if (dialogState.value) {
+                    DialogSearch(
+                        dialogState,
+                        onSubmit = { getData(it, this, daysList, currentDay) })
+                }
+
                 getData("Barnaul", this, daysList, currentDay)
 
                 Image(
@@ -57,7 +81,14 @@ class MainActivity : ComponentActivity() {
                     contentScale = ContentScale.FillBounds
                 )
                 Column {
-                    MainCard(currentDay)
+                    MainCard(
+                        currentDay, onClickSync = {
+                            getData("Barnaul", this@MainActivity, daysList, currentDay)
+                        },
+                        onClickSearch = {
+                            dialogState.value = true
+                        }
+                    )
                     TabLayout(daysList, currentDay)
                 }
             }

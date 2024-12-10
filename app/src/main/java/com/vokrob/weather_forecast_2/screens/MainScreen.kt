@@ -39,9 +39,14 @@ import com.vokrob.weather_forecast_2.ui.theme.BlueLight
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.SimpleDateFormat
 
 @Composable
-fun MainCard(currentDay: MutableState<WeatherModel>) {
+fun MainCard(
+    currentDay: MutableState<WeatherModel>,
+    onClickSync: () -> Unit,
+    onClickSearch: () -> Unit
+) {
     Column(
         modifier = Modifier
             .padding(5.dp),
@@ -108,7 +113,7 @@ fun MainCard(currentDay: MutableState<WeatherModel>) {
                     ) {
                         IconButton(
                             onClick = {
-
+                                onClickSearch.invoke()
                             }
                         ) {
                             Icon(
@@ -119,7 +124,7 @@ fun MainCard(currentDay: MutableState<WeatherModel>) {
                         }
 
                         Text(
-                            text = "${currentDay.value.maxTemp.toFloat().toInt()}°C /" +
+                            text = "${currentDay.value.maxTemp.toFloat().toInt()}°C / " +
                                     "${currentDay.value.minTemp.toFloat().toInt()}°C",
                             style = TextStyle(fontSize = 16.sp),
                             color = Color.White
@@ -127,7 +132,7 @@ fun MainCard(currentDay: MutableState<WeatherModel>) {
 
                         IconButton(
                             onClick = {
-
+                                onClickSync.invoke()
                             }
                         ) {
                             Icon(
@@ -206,13 +211,18 @@ private fun getWeatherByHours(hours: String): List<WeatherModel> {
     val hoursArray = JSONArray(hours)
     val list = ArrayList<WeatherModel>()
 
+    val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
+    val outputFormat = SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+
     for (i in 0 until hoursArray.length()) {
         val item = hoursArray[i] as JSONObject
+        val date = inputFormat.parse(item.getString("time"))
+        val formattedTime = outputFormat.format(date)
 
         list.add(
             WeatherModel(
                 "",
-                item.getString("time"),
+                formattedTime,
                 item.getString("temp_c").toFloat().toInt().toString() + "°C",
                 item.getJSONObject("condition").getString("text"),
                 item.getJSONObject("condition").getString("icon"),
